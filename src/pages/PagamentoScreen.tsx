@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronLeft, Waves, Copy, Check, Clock, Calendar } from "lucide-react";
+import { ChevronLeft, Waves, Copy, Check, Clock, Calendar, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -11,6 +12,7 @@ const PagamentoScreen = () => {
   const state = location.state as Record<string, string> | null;
   const [copied, setCopied] = useState(false);
   const [paid, setPaid] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   const pixCode = "00020126580014br.gov.bcb.pix0136wakepro-school-demo-pix-key5204000053039865802BR";
 
@@ -20,8 +22,27 @@ const PagamentoScreen = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSimulatePay = () => {
-    setPaid(true);
+  const handleSimulatePay = async () => {
+    setProcessing(true);
+    try {
+      if (state?.paymentId) {
+        await supabase
+          .from("payments")
+          .update({ status: "paid", paid_at: new Date().toISOString() })
+          .eq("id", state.paymentId);
+      }
+      if (state?.sessionId) {
+        await supabase
+          .from("sessions")
+          .update({ status: "confirmed" })
+          .eq("id", state.sessionId);
+      }
+      setPaid(true);
+    } catch (err) {
+      console.error("Erro ao confirmar pagamento:", err);
+    } finally {
+      setProcessing(false);
+    }
   };
 
   if (paid) {
@@ -163,9 +184,10 @@ const PagamentoScreen = () => {
       <div className="p-6">
         <button
           onClick={handleSimulatePay}
-          className="w-full py-4 rounded-2xl gradient-primary text-primary-foreground font-semibold text-lg shadow-glow active:scale-[0.98] transition-transform"
+          disabled={processing}
+          className="w-full py-4 rounded-2xl gradient-primary text-primary-foreground font-semibold text-lg shadow-glow active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          Já realizei o pagamento
+          {processing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Já realizei o pagamento"}
         </button>
       </div>
     </div>

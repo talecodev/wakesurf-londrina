@@ -14,7 +14,112 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          method: string
+          paid_at: string | null
+          session_id: string
+          status: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string
+          paid_at?: string | null
+          session_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          method?: string
+          paid_at?: string | null
+          session_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          contraindicacoes: string | null
+          created_at: string
+          id: string
+          idade: number | null
+          nome: string
+          peso: number | null
+          sexo: string | null
+          telefone: string
+        }
+        Insert: {
+          contraindicacoes?: string | null
+          created_at?: string
+          id?: string
+          idade?: number | null
+          nome: string
+          peso?: number | null
+          sexo?: string | null
+          telefone: string
+        }
+        Update: {
+          contraindicacoes?: string | null
+          created_at?: string
+          id?: string
+          idade?: number | null
+          nome?: string
+          peso?: number | null
+          sexo?: string | null
+          telefone?: string
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          session_date: string
+          session_time: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          session_date: string
+          session_time: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          session_date?: string
+          session_time?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
