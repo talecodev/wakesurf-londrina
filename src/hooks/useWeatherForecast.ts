@@ -1,0 +1,63 @@
+import { useState, useEffect } from "react";
+import { format } from "date-fns";
+
+// Coordenadas do spot de wakeboard (Windguru spot sc=447925)
+// Ajuste conforme a localização real do seu spot
+const SPOT_LAT = -23.55;
+const SPOT_LON = -46.63;
+
+export type DayWeather = {
+  date: string; // yyyy-MM-dd
+  precipitationMm: number;
+  windMaxKmh: number;
+  condition: "good" | "moderate" | "bad";
+};
+
+function classifyCondition(rainMm: number, windKmh: number): DayWeather["condition"] {
+  // Condições ruins para wakeboard: chuva forte ou vento muito forte
+  if (rainMm > 5 || windKmh > 30) return "bad";
+  // Condições moderadas: alguma chuva ou vento moderado
+  if (rainMm > 1 || windKmh > 20) return "moderate";
+  return "good";
+}
+
+export function useWeatherForecast() {
+  const [forecast, setForecast] = useState<DayWeather[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${SPOT_LAT}&longitude=${SPOT_LON}&daily=precipitation_sum,wind_speed_10m_max&timezone=America/Sao_Paulo&forecast_days=16`
+        );
+        const data = await res.json();
+
+        const days: DayWeather[] = data.daily.time.map((date: string, i: number) => ({
+          date,
+          precipitationMm: data.daily.precipitation_sum[i] ?? 0,
+          windMaxKmh: data.daily.wind_speed_10m_max[i] ?? 0,
+          condition: classifyCondition(
+            data.daily.precipitation_sum[i] ?? 0,
+            data.daily.wind_speed_10m_max[i] ?? 0
+          ),
+        }));
+
+        setForecast(days);
+      } catch (err) {
+        console.error("Erro ao buscar previsão:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWeather();
+  }, []);
+
+  const getWeatherForDate = (date: Date): DayWeather | undefined => {
+    const key = format(date, "yyyy-MM-dd");
+    return forecast.find((d) => d.date === key);
+  };
+
+  return { forecast, loading, getWeatherForDate };
+}
