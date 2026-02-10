@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
 
-// Coordenadas do spot de wakeboard (Windguru spot sc=447925)
-// Ajuste conforme a localização real do seu spot
-const SPOT_LAT = -23.55;
-const SPOT_LON = -46.63;
+// Coordenadas do spot de wakeboard — Porecatu, Paraná
+const SPOT_LAT = -22.7558;
+const SPOT_LON = -51.3789;
 
 export type DayWeather = {
   date: string; // yyyy-MM-dd
