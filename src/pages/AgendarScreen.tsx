@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Waves } from "lucide-react";
+import { ChevronLeft, ChevronRight, Waves, CloudRain, Wind, Sun, CloudSun, Loader2 } from "lucide-react";
 import {
   addDays,
   format,
@@ -12,17 +12,41 @@ import {
   startOfDay,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useWeatherForecast, type DayWeather } from "@/hooks/useWeatherForecast";
 
 const TIME_SLOTS = ["07:00", "08:30", "10:00", "11:30", "14:00", "15:30", "17:00"];
+
+const WeatherIcon = ({ condition }: { condition: DayWeather["condition"] }) => {
+  switch (condition) {
+    case "good":
+      return <Sun className="h-3.5 w-3.5 text-emerald-400" />;
+    case "moderate":
+      return <CloudSun className="h-3.5 w-3.5 text-amber-400" />;
+    case "bad":
+      return <CloudRain className="h-3.5 w-3.5 text-red-400" />;
+  }
+};
+
+const WeatherBadge = ({ weather, selected }: { weather?: DayWeather; selected: boolean }) => {
+  if (!weather) return null;
+  return (
+    <div className="mt-1">
+      <WeatherIcon condition={weather.condition} />
+    </div>
+  );
+};
 
 const AgendarScreen = () => {
   const navigate = useNavigate();
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const { getWeatherForDate, loading: weatherLoading } = useWeatherForecast();
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const today = startOfDay(new Date());
+
+  const selectedWeather = selectedDate ? getWeatherForDate(selectedDate) : undefined;
 
   const handleContinue = () => {
     if (selectedDate && selectedTime) {
@@ -49,6 +73,14 @@ const AgendarScreen = () => {
         <div className="w-6" />
       </div>
 
+      {/* Weather Legend */}
+      <div className="px-6 pb-2 flex items-center gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1"><Sun className="h-3 w-3 text-emerald-400" /> Bom</span>
+        <span className="flex items-center gap-1"><CloudSun className="h-3 w-3 text-amber-400" /> Moderado</span>
+        <span className="flex items-center gap-1"><CloudRain className="h-3 w-3 text-red-400" /> Ruim</span>
+        {weatherLoading && <Loader2 className="h-3 w-3 animate-spin ml-auto" />}
+      </div>
+
       {/* Month/Year */}
       <div className="px-6 pb-4 flex items-center justify-between">
         <button onClick={() => setWeekStart(addDays(weekStart, -7))}>
@@ -68,6 +100,7 @@ const AgendarScreen = () => {
           {weekDays.map((day) => {
             const past = isBefore(day, today);
             const selected = selectedDate && isSameDay(day, selectedDate);
+            const weather = getWeatherForDate(day);
             return (
               <button
                 key={day.toISOString()}
@@ -105,11 +138,54 @@ const AgendarScreen = () => {
                     }`}
                   />
                 )}
+                {!past && <WeatherBadge weather={weather} selected={!!selected} />}
               </button>
             );
           })}
         </div>
       </div>
+
+      {/* Weather Detail Card */}
+      <AnimatePresence mode="wait">
+        {selectedDate && selectedWeather && (
+          <motion.div
+            key={`weather-${selectedDate.toISOString()}`}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="px-6 pb-4"
+          >
+            <div
+              className={`glass rounded-2xl p-4 flex items-center gap-4 border-l-4 ${
+                selectedWeather.condition === "good"
+                  ? "border-l-emerald-400"
+                  : selectedWeather.condition === "moderate"
+                  ? "border-l-amber-400"
+                  : "border-l-red-400"
+              }`}
+            >
+              <WeatherIcon condition={selectedWeather.condition} />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">
+                  {selectedWeather.condition === "good"
+                    ? "Condições ideais para wakeboard! 🤙"
+                    : selectedWeather.condition === "moderate"
+                    ? "Condições aceitáveis, fique atento."
+                    : "Condições desfavoráveis para wakeboard."}
+                </p>
+                <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <CloudRain className="h-3 w-3" /> {selectedWeather.precipitationMm.toFixed(1)}mm
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Wind className="h-3 w-3" /> {selectedWeather.windMaxKmh.toFixed(0)} km/h
+                  </span>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Time Slots */}
       <AnimatePresence mode="wait">
