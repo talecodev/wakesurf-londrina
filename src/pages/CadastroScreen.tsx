@@ -88,7 +88,7 @@ const CadastroScreen = () => {
         if (paymentErr || !payment) throw paymentErr;
 
         navigate("/pagamento", {
-          state: { ...form, date, time, sessionId: session.id, paymentId: payment.id },
+          state: { ...form, date, time, sessionId: session.id, paymentId: payment.id, profileId: profile.id },
         });
       } catch (err) {
         console.error("Erro ao salvar:", err);

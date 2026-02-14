@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronLeft, Waves, Copy, Check, Clock, Calendar, Loader2 } from "lucide-react";
+import { ChevronLeft, Waves, Copy, Check, Clock, Calendar, Loader2, CalendarPlus, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 
 const PagamentoScreen = () => {
   const navigate = useNavigate();
@@ -13,6 +14,21 @@ const PagamentoScreen = () => {
   const [copied, setCopied] = useState(false);
   const [paid, setPaid] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [calendarSynced, setCalendarSynced] = useState(false);
+
+  const profileId = state?.profileId || null;
+  const { isConnected, loading: calLoading, syncing, connect, createEvent, googleEmail } = useGoogleCalendar(profileId);
+
+  // Check if returning from Google OAuth
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("google_connected") === "true") {
+      // Clean URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete("google_connected");
+      window.history.replaceState({}, "", url.pathname);
+    }
+  }, []);
 
   const pixCode = "00020126580014br.gov.bcb.pix0136wakepro-school-demo-pix-key5204000053039865802BR";
 
@@ -37,6 +53,20 @@ const PagamentoScreen = () => {
           .update({ status: "confirmed" })
           .eq("id", state.sessionId);
       }
+
+      // Auto-sync to Google Calendar if connected
+      if (isConnected && state?.sessionId && state?.date && state?.time) {
+        const result = await createEvent({
+          session_id: state.sessionId,
+          session_date: format(new Date(state.date), "yyyy-MM-dd"),
+          session_time: state.time,
+          nome: state.nome,
+        });
+        if (result?.success) {
+          setCalendarSynced(true);
+        }
+      }
+
       setPaid(true);
     } catch (err) {
       console.error("Erro ao confirmar pagamento:", err);
@@ -66,6 +96,17 @@ const PagamentoScreen = () => {
           <p className="text-muted-foreground">
             Você receberá uma confirmação via WhatsApp com todos os detalhes.
           </p>
+          {calendarSynced && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex items-center justify-center gap-2 text-sm text-primary"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              <span>Adicionado ao Google Agenda</span>
+            </motion.div>
+          )}
           {state?.date && (
             <div className="glass rounded-2xl p-5 mt-6 space-y-3">
               <div className="flex items-center gap-3 text-foreground">
@@ -79,6 +120,20 @@ const PagamentoScreen = () => {
                 <span className="font-medium">{state.time}</span>
               </div>
             </div>
+          )}
+
+          {/* Connect Google Calendar if not connected */}
+          {!isConnected && !calLoading && profileId && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              onClick={() => connect()}
+              className="mt-4 w-full glass rounded-2xl p-4 flex items-center justify-center gap-3 text-foreground hover:border-primary/30 transition-all"
+            >
+              <CalendarPlus className="h-5 w-5 text-primary" />
+              <span className="font-medium">Conectar Google Agenda</span>
+            </motion.button>
           )}
         </motion.div>
         <button
@@ -132,6 +187,39 @@ const PagamentoScreen = () => {
             </div>
           )}
         </motion.div>
+
+        {/* Google Calendar Connect */}
+        {!calLoading && profileId && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            {isConnected ? (
+              <div className="glass rounded-2xl p-4 flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">Google Agenda conectado</p>
+                  {googleEmail && (
+                    <p className="text-xs text-muted-foreground">{googleEmail}</p>
+                  )}
+                </div>
+                <CalendarPlus className="h-4 w-4 text-muted-foreground" />
+              </div>
+            ) : (
+              <button
+                onClick={() => connect()}
+                className="w-full glass rounded-2xl p-4 flex items-center gap-3 hover:border-primary/30 transition-all"
+              >
+                <CalendarPlus className="h-5 w-5 text-primary shrink-0" />
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-medium text-foreground">Conectar Google Agenda</p>
+                  <p className="text-xs text-muted-foreground">Adicionar sessão automaticamente</p>
+                </div>
+              </button>
+            )}
+          </motion.div>
+        )}
 
         {/* PIX */}
         <motion.div
@@ -187,7 +275,14 @@ const PagamentoScreen = () => {
           disabled={processing}
           className="w-full py-4 rounded-2xl gradient-primary text-primary-foreground font-semibold text-lg shadow-glow active:scale-[0.98] transition-transform disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          {processing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Já realizei o pagamento"}
+          {processing ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              {syncing ? "Sincronizando agenda..." : "Processando..."}
+            </>
+          ) : (
+            "Já realizei o pagamento"
+          )}
         </button>
       </div>
     </div>

@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      google_integrations: {
+        Row: {
+          access_token: string
+          created_at: string
+          google_email: string
+          id: string
+          profile_id: string
+          refresh_token: string
+          token_expiration: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          google_email: string
+          id?: string
+          profile_id: string
+          refresh_token: string
+          token_expiration: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          google_email?: string
+          id?: string
+          profile_id?: string
+          refresh_token?: string
+          token_expiration?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "google_integrations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -88,7 +129,10 @@ export type Database = {
       sessions: {
         Row: {
           created_at: string
+          google_calendar_id: string | null
+          google_event_id: string | null
           id: string
+          last_sync_at: string | null
           profile_id: string
           session_date: string
           session_time: string
@@ -96,7 +140,10 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          google_calendar_id?: string | null
+          google_event_id?: string | null
           id?: string
+          last_sync_at?: string | null
           profile_id: string
           session_date: string
           session_time: string
@@ -104,7 +151,10 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          google_calendar_id?: string | null
+          google_event_id?: string | null
           id?: string
+          last_sync_at?: string | null
           profile_id?: string
           session_date?: string
           session_time?: string
