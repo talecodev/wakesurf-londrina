@@ -45,8 +45,7 @@ const HeroScreen = () => {
             <span className="text-gradient">águas.</span>
           </h1>
           <p className="text-muted-foreground text-base max-w-xs mx-auto">
-            Sessions exclusivas com instrutores profissionais. 
-            Agende sua experiência agora.
+            Pratique um esporte e conecte-se com a natureza, recarregue as energias e eleve a sua inspiração.
           </p>
         </div>
 
