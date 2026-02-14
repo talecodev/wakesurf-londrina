@@ -28,7 +28,7 @@ const HeroScreen = () => {
         <img 
           src={logo} 
           alt="WAKESURF LONDRINA" 
-          className="h-24 object-contain"
+          className="h-40 w-auto object-contain brightness-0 invert"
         />
       </motion.div>
 
