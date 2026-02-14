@@ -75,11 +75,12 @@ Deno.serve(async (req) => {
 
     const finalRedirect = redirect_url || "/";
     const separator = finalRedirect.includes("?") ? "&" : "?";
+    const redirectTo = `${finalRedirect}${separator}google_connected=true`;
 
-    return new Response(
-      `<html><body><script>window.location.href="${finalRedirect}${separator}google_connected=true";</script></body></html>`,
-      { headers: { "Content-Type": "text/html" } }
-    );
+    return new Response(null, {
+      status: 302,
+      headers: { "Location": redirectTo },
+    });
   } catch (error) {
     console.error("Callback error:", error);
     return new Response(`<html><body><p>An error occurred. Please try again.</p></body></html>`, {
