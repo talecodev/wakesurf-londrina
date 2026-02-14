@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-wakeboard.jpg";
-import { Waves } from "lucide-react";
+import logo from "@/assets/logo-wakesurf.jpg";
 
 const HeroScreen = () => {
   const navigate = useNavigate();
@@ -23,17 +23,13 @@ const HeroScreen = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className="absolute top-12 left-0 right-0 flex flex-col items-center gap-2"
+        className="absolute top-8 left-0 right-0 flex items-center justify-center"
       >
-        <div className="flex items-center gap-2">
-          <Waves className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-bold tracking-tight text-foreground">
-            WAKE<span className="text-gradient">PRO</span>
-          </span>
-        </div>
-        <p className="text-sm font-medium tracking-widest uppercase text-muted-foreground">
-          Escola de Wakeboard
-        </p>
+        <img 
+          src={logo} 
+          alt="WAKESURF LONDRINA" 
+          className="h-24 object-contain"
+        />
       </motion.div>
 
       {/* CTA Section */}
