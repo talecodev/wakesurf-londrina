@@ -63,8 +63,8 @@ const HeroScreen = () => {
           </div>
           <div className="h-8 w-px bg-border" />
           <div className="text-center">
-            <span className="block text-xl font-bold text-foreground">4.9</span>
-            Avaliação
+            <span className="block text-xl font-bold text-foreground">1h</span>
+            de Londrina
           </div>
           <div className="h-8 w-px bg-border" />
           <div className="text-center">
