@@ -8,6 +8,7 @@ import AgendarScreen from "./pages/AgendarScreen";
 import CadastroScreen from "./pages/CadastroScreen";
 import PagamentoScreen from "./pages/PagamentoScreen";
 import NotFound from "./pages/NotFound";
+import AdminCalendarScreen from "./pages/AdminCalendarScreen";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/agendar" element={<AgendarScreen />} />
           <Route path="/cadastro" element={<CadastroScreen />} />
           <Route path="/pagamento" element={<PagamentoScreen />} />
+          <Route path="/admin/calendar" element={<AdminCalendarScreen />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

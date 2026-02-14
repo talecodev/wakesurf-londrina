@@ -1,52 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const useGoogleCalendar = (profileId: string | null) => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [loading, setLoading] = useState(true);
+export const useGoogleCalendar = () => {
   const [syncing, setSyncing] = useState(false);
-  const [googleEmail, setGoogleEmail] = useState<string | null>(null);
-
-  const checkConnection = useCallback(async () => {
-    if (!profileId) {
-      setLoading(false);
-      return;
-    }
-    try {
-      const { data } = await supabase
-        .from("google_integrations")
-        .select("google_email")
-        .eq("profile_id", profileId)
-        .maybeSingle();
-
-      setIsConnected(!!data);
-      setGoogleEmail(data?.google_email || null);
-    } catch (err) {
-      console.error("Error checking Google Calendar connection:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [profileId]);
-
-  useEffect(() => {
-    checkConnection();
-  }, [checkConnection]);
-
-  const connect = useCallback(async (redirectUrl?: string) => {
-    if (!profileId) return;
-    try {
-      const { data, error } = await supabase.functions.invoke("google-calendar-auth", {
-        body: { profile_id: profileId, redirect_url: redirectUrl || window.location.href },
-      });
-
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      console.error("Error connecting Google Calendar:", err);
-    }
-  }, [profileId]);
 
   const createEvent = useCallback(async (params: {
     session_id: string;
@@ -54,17 +10,11 @@ export const useGoogleCalendar = (profileId: string | null) => {
     session_time: string;
     nome?: string;
   }) => {
-    if (!profileId || !isConnected) return null;
     setSyncing(true);
     try {
       const { data, error } = await supabase.functions.invoke("google-calendar-sync", {
-        body: {
-          action: "create",
-          profile_id: profileId,
-          ...params,
-        },
+        body: { action: "create", ...params },
       });
-
       if (error) throw error;
       return data;
     } catch (err) {
@@ -73,35 +23,19 @@ export const useGoogleCalendar = (profileId: string | null) => {
     } finally {
       setSyncing(false);
     }
-  }, [profileId, isConnected]);
+  }, []);
 
-  const deleteEvent = useCallback(async (sessionId: string, googleEventId: string) => {
-    if (!profileId) return;
-    setSyncing(true);
+  const connectOwner = useCallback(async (redirectUrl?: string) => {
     try {
-      await supabase.functions.invoke("google-calendar-sync", {
-        body: {
-          action: "delete",
-          profile_id: profileId,
-          session_id: sessionId,
-          google_event_id: googleEventId,
-        },
+      const { data, error } = await supabase.functions.invoke("google-calendar-auth", {
+        body: { redirect_url: redirectUrl || window.location.href },
       });
+      if (error) throw error;
+      if (data?.url) window.location.href = data.url;
     } catch (err) {
-      console.error("Error deleting Google Calendar event:", err);
-    } finally {
-      setSyncing(false);
+      console.error("Error connecting Google Calendar:", err);
     }
-  }, [profileId]);
+  }, []);
 
-  return {
-    isConnected,
-    loading,
-    syncing,
-    googleEmail,
-    connect,
-    createEvent,
-    deleteEvent,
-    checkConnection,
-  };
+  return { syncing, createEvent, connectOwner };
 };

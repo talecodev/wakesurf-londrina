@@ -12,14 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { profile_id, redirect_url } = await req.json();
-
-    if (!profile_id) {
-      return new Response(
-        JSON.stringify({ error: "profile_id is required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const { redirect_url } = await req.json();
 
     const clientId = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID")!;
     const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-calendar-callback`;
@@ -31,8 +24,7 @@ Deno.serve(async (req) => {
       "https://www.googleapis.com/auth/calendar",
     ].join(" ");
 
-    // Store profile_id and redirect_url in state param
-    const state = btoa(JSON.stringify({ profile_id, redirect_url: redirect_url || "" }));
+    const state = btoa(JSON.stringify({ redirect_url: redirect_url || "" }));
 
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
     authUrl.searchParams.set("client_id", clientId);

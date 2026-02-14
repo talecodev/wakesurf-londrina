@@ -17,9 +17,8 @@ Deno.serve(async (req) => {
       return new Response("Missing code or state", { status: 400 });
     }
 
-    const { profile_id, redirect_url } = JSON.parse(atob(stateParam));
+    const { redirect_url } = JSON.parse(atob(stateParam));
 
-    // Exchange code for tokens
     const clientId = Deno.env.get("GOOGLE_OAUTH_CLIENT_ID")!;
     const clientSecret = Deno.env.get("GOOGLE_OAUTH_CLIENT_SECRET")!;
     const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/google-calendar-callback`;
@@ -45,13 +44,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Get user info for google email
     const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
       headers: { Authorization: `Bearer ${tokens.access_token}` },
     });
     const userInfo = await userInfoRes.json();
 
-    // Store in database
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -59,19 +56,18 @@ Deno.serve(async (req) => {
 
     const tokenExpiration = new Date(Date.now() + tokens.expires_in * 1000).toISOString();
 
+    // Delete any existing owner integration and insert the new one
+    await supabase.from("google_integrations").delete().eq("is_owner", true);
+
     const { error: dbError } = await supabase
       .from("google_integrations")
-      .upsert(
-        {
-          profile_id,
-          google_email: userInfo.email,
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
-          token_expiration: tokenExpiration,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "profile_id" }
-      );
+      .insert({
+        google_email: userInfo.email,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        token_expiration: tokenExpiration,
+        is_owner: true,
+      });
 
     if (dbError) {
       console.error("DB error:", dbError);
