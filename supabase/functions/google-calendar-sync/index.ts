@@ -24,11 +24,11 @@ async function refreshAccessToken(refreshToken: string): Promise<{ access_token:
   return res.json();
 }
 
-async function getValidToken(supabase: any, profileId: string) {
+async function getOwnerToken(supabase: any) {
   const { data: integration } = await supabase
     .from("google_integrations")
     .select("*")
-    .eq("profile_id", profileId)
+    .eq("is_owner", true)
     .single();
 
   if (!integration) return null;
@@ -47,7 +47,7 @@ async function getValidToken(supabase: any, profileId: string) {
         token_expiration: newExpiration,
         updated_at: new Date().toISOString(),
       })
-      .eq("profile_id", profileId);
+      .eq("id", integration.id);
 
     return refreshed.access_token;
   }
@@ -61,17 +61,17 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { action, profile_id, session_id, session_date, session_time, nome, google_event_id } = await req.json();
+    const { action, session_id, session_date, session_time, nome, google_event_id } = await req.json();
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const accessToken = await getValidToken(supabase, profile_id);
+    const accessToken = await getOwnerToken(supabase);
     if (!accessToken) {
       return new Response(
-        JSON.stringify({ error: "Google Calendar not connected or token expired" }),
+        JSON.stringify({ error: "Google Calendar not connected by owner" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -79,7 +79,6 @@ Deno.serve(async (req) => {
     const calendarId = "primary";
 
     if (action === "create") {
-      // Build event
       const startDateTime = `${session_date}T${session_time}:00`;
       const [hours, minutes] = session_time.split(":").map(Number);
       const endHour = hours + 1;
@@ -95,8 +94,8 @@ Deno.serve(async (req) => {
         reminders: {
           useDefault: false,
           overrides: [
-            { method: "popup", minutes: 1440 }, // 24h
-            { method: "popup", minutes: 60 },    // 1h
+            { method: "popup", minutes: 1440 },
+            { method: "popup", minutes: 60 },
           ],
         },
       };
@@ -124,7 +123,6 @@ Deno.serve(async (req) => {
 
       const createdEvent = await res.json();
 
-      // Update session with google_event_id
       await supabase
         .from("sessions")
         .update({
@@ -149,7 +147,6 @@ Deno.serve(async (req) => {
         }
       );
 
-      // 204 or 410 means deleted
       if (!res.ok && res.status !== 410) {
         const errBody = await res.text();
         console.error("Google Calendar delete error:", errBody);

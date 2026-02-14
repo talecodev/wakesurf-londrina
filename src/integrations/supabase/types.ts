@@ -20,7 +20,8 @@ export type Database = {
           created_at: string
           google_email: string
           id: string
-          profile_id: string
+          is_owner: boolean
+          profile_id: string | null
           refresh_token: string
           token_expiration: string
           updated_at: string
@@ -30,7 +31,8 @@ export type Database = {
           created_at?: string
           google_email: string
           id?: string
-          profile_id: string
+          is_owner?: boolean
+          profile_id?: string | null
           refresh_token: string
           token_expiration: string
           updated_at?: string
@@ -40,20 +42,13 @@ export type Database = {
           created_at?: string
           google_email?: string
           id?: string
-          profile_id?: string
+          is_owner?: boolean
+          profile_id?: string | null
           refresh_token?: string
           token_expiration?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "google_integrations_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       payments: {
         Row: {
