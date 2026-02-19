@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   DollarSign, Calendar, CloudRain, Wind, Sun, CloudSun,
   Clock, MessageSquare, LogOut, Loader2, Plus, Trash2, Send,
-  ChevronLeft
+  ChevronLeft, Image as ImageIcon, Upload
 } from "lucide-react";
 import { format, addDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -32,6 +32,9 @@ const AdminDashboard = () => {
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [loadingData, setLoadingData] = useState(true);
+  const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
+  const [photoTitle, setPhotoTitle] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -81,6 +84,14 @@ const AdminDashboard = () => {
       .limit(20);
     setMessages(msgs || []);
 
+    // Gallery
+    const { data: gallery } = await supabase
+      .from("gallery_photos")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    setGalleryPhotos(gallery || []);
+
     setLoadingData(false);
   };
 
@@ -98,6 +109,35 @@ const AdminDashboard = () => {
 
   const handleDeleteMessage = async (id: string) => {
     await supabase.from("board_messages").delete().eq("id", id);
+    fetchData();
+  };
+
+  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `${Date.now()}.${ext}`;
+    const { error: uploadError } = await supabase.storage.from("gallery").upload(path, file);
+    if (uploadError) {
+      setUploading(false);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("gallery").getPublicUrl(path);
+    await supabase.from("gallery_photos").insert({
+      title: photoTitle.trim() || null,
+      image_url: urlData.publicUrl,
+      uploaded_by: user!.id,
+    });
+    setPhotoTitle("");
+    setUploading(false);
+    fetchData();
+  };
+
+  const handleDeletePhoto = async (id: string, url: string) => {
+    const path = url.split("/gallery/")[1];
+    if (path) await supabase.storage.from("gallery").remove([path]);
+    await supabase.from("gallery_photos").delete().eq("id", id);
     fetchData();
   };
 
@@ -297,6 +337,57 @@ const AdminDashboard = () => {
                   <Trash2 className="h-4 w-4" />
                 </button>
               </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Galeria de Fotos */}
+        <div className="glass rounded-2xl p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <ImageIcon className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+              Galeria de Fotos
+            </h2>
+          </div>
+
+          <div className="space-y-2">
+            <input
+              value={photoTitle}
+              onChange={(e) => setPhotoTitle(e.target.value)}
+              placeholder="Título da foto (opcional)"
+              className="w-full px-3 py-2 rounded-xl bg-secondary/50 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+            <label className="w-full py-2.5 rounded-xl gradient-primary text-primary-foreground font-medium text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] transition-all">
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              {uploading ? "Enviando..." : "Enviar Foto"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleUploadPhoto}
+                className="hidden"
+                disabled={uploading}
+              />
+            </label>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {galleryPhotos.map((p) => (
+              <div key={p.id} className="relative rounded-xl overflow-hidden bg-secondary/50 aspect-square group">
+                <img src={p.image_url} alt={p.title || "Foto"} className="h-full w-full object-cover" />
+                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleDeletePhoto(p.id, p.image_url)}
+                    className="p-1.5 rounded-lg bg-destructive/80 text-white"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+                {p.title && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
+                    <p className="text-xs text-white truncate">{p.title}</p>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>

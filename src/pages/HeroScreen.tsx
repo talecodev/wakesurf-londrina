@@ -71,8 +71,15 @@ const HeroScreen = () => {
           </button>
 
           <button
+            onClick={() => navigate("/rider/login")}
+            className="w-full max-w-sm py-3 px-8 rounded-2xl glass text-foreground font-medium text-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+          >
+            🏄 Entrar como Rider
+          </button>
+
+          <button
             onClick={() => navigate("/admin/login")}
-            className="w-full max-w-sm py-3 px-8 rounded-2xl glass text-muted-foreground font-medium text-sm active:scale-[0.98] transition-transform"
+            className="w-full max-w-sm py-3 px-8 rounded-2xl glass text-muted-foreground font-medium text-xs active:scale-[0.98] transition-transform"
           >
             Fazer login como administrador
           </button>

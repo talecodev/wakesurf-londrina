@@ -11,6 +11,8 @@ import NotFound from "./pages/NotFound";
 import AdminCalendarScreen from "./pages/AdminCalendarScreen";
 import AdminLoginScreen from "./pages/AdminLoginScreen";
 import AdminDashboard from "./pages/AdminDashboard";
+import RiderLoginScreen from "./pages/RiderLoginScreen";
+import RiderDashboard from "./pages/RiderDashboard";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,8 @@ const App = () => (
           <Route path="/admin/calendar" element={<AdminCalendarScreen />} />
           <Route path="/admin/login" element={<AdminLoginScreen />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/rider/login" element={<RiderLoginScreen />} />
+          <Route path="/rider/dashboard" element={<RiderDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

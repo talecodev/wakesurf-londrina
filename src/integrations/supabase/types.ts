@@ -38,6 +38,30 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_photos: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          title: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          title?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          title?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       google_integrations: {
         Row: {
           access_token: string
@@ -144,6 +168,38 @@ export type Database = {
           telefone?: string
         }
         Relationships: []
+      }
+      rider_profiles: {
+        Row: {
+          created_at: string
+          id: string
+          nickname: string
+          profile_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nickname: string
+          profile_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nickname?: string
+          profile_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rider_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sessions: {
         Row: {
