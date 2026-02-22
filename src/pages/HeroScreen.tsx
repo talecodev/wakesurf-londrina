@@ -38,12 +38,12 @@ const HeroScreen = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="absolute top-8 left-0 right-0 flex items-center justify-center"
+          className="absolute top-8 left-0 right-0 flex items-center justify-center z-20"
         >
           <img
             src={logo}
             alt="WAKESURF LONDRINA"
-            className="h-40 w-auto object-contain brightness-0 invert"
+            className="h-32 w-auto object-contain brightness-0 invert"
           />
         </motion.div>
 
@@ -62,7 +62,7 @@ const HeroScreen = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.8 }}
-              className="liquid-glass rounded-3xl px-6 py-5 max-w-sm mx-auto"
+              className="liquid-glass rounded-3xl px-5 py-4 max-w-xs mx-auto"
             >
               <p className="text-foreground/90 text-base leading-relaxed text-center font-light">
                 Pratique um esporte e conecte-se com a natureza, recarregue as energias e eleve a sua inspiração.
