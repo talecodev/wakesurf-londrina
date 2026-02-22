@@ -58,9 +58,16 @@ const HeroScreen = () => {
               Domine as <br />
               <span className="text-gradient">águas.</span>
             </h1>
-            <p className="text-muted-foreground text-base max-w-xs mx-auto">
-              Pratique um esporte e conecte-se com a natureza, recarregue as energias e eleve a sua inspiração.
-            </p>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className="liquid-glass rounded-3xl px-6 py-5 max-w-sm mx-auto"
+            >
+              <p className="text-foreground/90 text-base leading-relaxed text-center font-light">
+                Pratique um esporte e conecte-se com a natureza, recarregue as energias e eleve a sua inspiração.
+              </p>
+            </motion.div>
           </div>
 
           <button
