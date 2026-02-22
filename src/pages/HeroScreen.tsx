@@ -38,7 +38,7 @@ const HeroScreen = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="absolute top-8 left-0 right-0 flex items-center justify-center z-20"
+          className="absolute top-4 left-0 right-0 flex items-center justify-center z-20"
         >
           <img
             src={logo}
