@@ -35,6 +35,7 @@ const AdminDashboard = () => {
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
   const [photoTitle, setPhotoTitle] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [sendingWhatsApp, setSendingWhatsApp] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -144,6 +145,26 @@ const AdminDashboard = () => {
   const handleLogout = async () => {
     await signOut();
     navigate("/");
+  };
+
+  const handleSendWhatsApp = async (session: any) => {
+    const telefone = session.profiles?.telefone;
+    const nome = session.profiles?.nome || "Cliente";
+    if (!telefone) return;
+    setSendingWhatsApp(session.id);
+    try {
+      const dateStr = format(new Date(session.session_date + "T12:00:00"), "dd/MM", { locale: ptBR });
+      await supabase.functions.invoke("send-whatsapp", {
+        body: {
+          number: `55${telefone.replace(/\D/g, "")}`,
+          body: `Olá ${nome}! Precisamos remarcar sua sessão do dia ${dateStr} às ${session.session_time}. Entre em contato conosco. — Wakesurf Londrina`,
+        },
+      });
+    } catch (err) {
+      console.error("Erro ao enviar WhatsApp:", err);
+    } finally {
+      setSendingWhatsApp(null);
+    }
   };
 
   const next5Days = Array.from({ length: 5 }, (_, i) => addDays(new Date(), i));
@@ -262,17 +283,18 @@ const AdminDashboard = () => {
                       {s.status === "confirmed" ? "Confirmado" : "Pendente"}
                     </span>
                     {s.profiles?.telefone && (
-                      <a
-                        href={`https://wa.me/55${s.profiles.telefone.replace(/\D/g, "")}?text=${encodeURIComponent(
-                          `Olá ${s.profiles.nome}! Precisamos remarcar sua sessão do dia ${format(new Date(s.session_date + "T12:00:00"), "dd/MM")} às ${s.session_time}. Entre em contato conosco.`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      <button
+                        onClick={() => handleSendWhatsApp(s)}
+                        disabled={sendingWhatsApp === s.id}
+                        className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
                         title="Enviar alerta via WhatsApp"
                       >
-                        <Send className="h-3.5 w-3.5" />
-                      </a>
+                        {sendingWhatsApp === s.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Send className="h-3.5 w-3.5" />
+                        )}
+                      </button>
                     )}
                   </div>
                 </div>

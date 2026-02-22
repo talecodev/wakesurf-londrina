@@ -51,6 +51,17 @@ const PagamentoScreen = () => {
         }).catch(() => {}); // Silent fail - don't block payment confirmation
       }
 
+      // Send WhatsApp confirmation via AtendiTop (silent, non-blocking)
+      if (state?.telefone && state?.nome && state?.date && state?.time) {
+        const formattedDate = format(new Date(state.date), "dd/MM/yyyy", { locale: ptBR });
+        supabase.functions.invoke("send-whatsapp", {
+          body: {
+            number: `55${state.telefone.replace(/\D/g, "")}`,
+            body: `Olá ${state.nome}! 🏄 Sua sessão de Wakeboard está confirmada para ${formattedDate} às ${state.time}. Nos vemos no spot! 🤙 — Wakesurf Londrina`,
+          },
+        }).catch(() => {}); // Silent fail
+      }
+
       setPaid(true);
     } catch (err) {
       console.error("Erro ao confirmar pagamento:", err);
