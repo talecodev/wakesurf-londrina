@@ -5,7 +5,7 @@ import { MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import heroImage from "@/assets/hero-wakeboard.jpg";
-import logo from "@/assets/logo-wakesurf.jpg";
+import logo from "@/assets/logo-wakesurf-full.jpeg";
 import { supabase } from "@/integrations/supabase/client";
 
 const HeroScreen = () => {
@@ -43,7 +43,7 @@ const HeroScreen = () => {
           <img
             src={logo}
             alt="WAKESURF LONDRINA"
-            className="h-32 w-auto object-contain brightness-0 invert"
+            className="h-24 w-auto object-contain drop-shadow-2xl"
           />
         </motion.div>
 
@@ -54,7 +54,7 @@ const HeroScreen = () => {
           className="relative z-10 w-full px-6 pb-12 flex flex-col items-center gap-6"
         >
           <div className="text-center space-y-3">
-            <h1 className="text-4xl font-bold tracking-tight text-foreground leading-tight">
+            <h1 className="text-4xl font-extrabold tracking-tight text-foreground leading-tight font-display">
               Domine as <br />
               <span className="text-gradient">águas.</span>
             </h1>
