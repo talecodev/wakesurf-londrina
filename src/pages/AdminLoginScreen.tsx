@@ -76,7 +76,7 @@ const AdminLoginScreen = () => {
           className="w-full max-w-sm space-y-6"
         >
           <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">Login Administrativo</h1>
+            <h1 className="text-2xl font-bold text-foreground font-display">Login Administrativo</h1>
             <p className="text-sm text-muted-foreground">Acesse o painel de controle</p>
           </div>
 

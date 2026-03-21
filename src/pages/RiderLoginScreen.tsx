@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, Loader2, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import logo from "@/assets/logo-wakesurf.jpg";
+import logo from "@/assets/logo-wakesurf-full.jpeg";
 
 const RiderLoginScreen = () => {
   const navigate = useNavigate();
@@ -117,8 +117,8 @@ const RiderLoginScreen = () => {
           className="w-full max-w-sm space-y-8"
         >
           <div className="flex flex-col items-center gap-4">
-            <img src={logo} alt="WAKESURF" className="h-24 w-auto object-contain brightness-0 invert" />
-            <h1 className="text-2xl font-bold text-foreground">Área do Rider</h1>
+            <img src={logo} alt="WAKESURF" className="h-24 w-auto object-contain rounded-xl" />
+            <h1 className="text-2xl font-bold text-foreground font-display">Área do Rider</h1>
             <p className="text-sm text-muted-foreground text-center">
               Faça login para acompanhar seu progresso e ranking
             </p>

@@ -87,7 +87,7 @@ const PagamentoScreen = () => {
           transition={{ delay: 0.3 }}
           className="text-center space-y-3"
         >
-          <h1 className="text-3xl font-bold text-foreground">Session Confirmada!</h1>
+          <h1 className="text-3xl font-bold text-foreground font-display">Session Confirmada!</h1>
           <p className="text-muted-foreground">
             Você receberá uma confirmação via WhatsApp com todos os detalhes.
           </p>
