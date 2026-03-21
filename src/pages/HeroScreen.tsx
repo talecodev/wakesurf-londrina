@@ -54,7 +54,7 @@ const HeroScreen = () => {
           className="relative z-10 w-full px-6 pb-12 flex flex-col items-center gap-6"
         >
           <div className="text-center space-y-3">
-            <h1 className="text-4xl font-bold tracking-tight text-foreground leading-tight">
+            <h1 className="text-4xl font-extrabold tracking-tight text-foreground leading-tight font-display">
               Domine as <br />
               <span className="text-gradient">águas.</span>
             </h1>
