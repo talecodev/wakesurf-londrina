@@ -5,7 +5,7 @@ import { MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import heroImage from "@/assets/hero-wakeboard.jpg";
-import logo from "@/assets/logo-wakesurf-full.jpeg";
+import logo from "@/assets/logo-wakesurf-brand.jpeg";
 import { supabase } from "@/integrations/supabase/client";
 
 const HeroScreen = () => {
