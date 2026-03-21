@@ -149,7 +149,7 @@ const CadastroScreen = () => {
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <h2 className="text-2xl font-bold text-foreground">{current.label}</h2>
+            <h2 className="text-2xl font-bold text-foreground font-display">{current.label}</h2>
             {"subtitle" in current && current.subtitle && (
               <p className="text-sm text-muted-foreground">{current.subtitle}</p>
             )}
