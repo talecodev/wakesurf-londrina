@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, Loader2, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import logo from "@/assets/logo-wakesurf.jpg";
+import logo from "@/assets/logo-wakesurf-full.jpeg";
 
 const RiderLoginScreen = () => {
   const navigate = useNavigate();
