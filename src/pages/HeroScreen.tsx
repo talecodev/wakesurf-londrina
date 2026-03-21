@@ -43,7 +43,7 @@ const HeroScreen = () => {
           <img
             src={logo}
             alt="WAKESURF LONDRINA"
-            className="h-24 w-auto object-contain drop-shadow-2xl"
+            className="h-28 w-auto object-contain rounded-2xl shadow-lg"
           />
         </motion.div>
 
