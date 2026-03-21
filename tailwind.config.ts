@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Outfit', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        display: ['Sora', 'Outfit', 'sans-serif'],
+        sans: ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['Nunito', 'DM Sans', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
