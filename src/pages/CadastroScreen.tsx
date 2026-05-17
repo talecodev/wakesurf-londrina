@@ -19,7 +19,7 @@ const steps = [
   { key: "peso", label: "Qual seu peso?", subtitle: "Importante para configurar o lastro da lancha.", placeholder: "Ex: 75", type: "number", suffix: "kg" },
   { key: "sexo", label: "Sexo", type: "select", options: ["Masculino", "Feminino", "Outro"] },
   { key: "idade", label: "Qual sua idade?", placeholder: "Ex: 28", type: "number" },
-  { key: "contraindicacoes", label: "Possui contraindicações médicas?", placeholder: "Descreva ou deixe em branco", type: "textarea" },
+  { key: "contraindicacoes", label: "Possui contraindicações médicas ou limitação física?", placeholder: "Descreva ou deixe em branco", type: "textarea" },
 ] as const;
 
 const CadastroScreen = () => {
