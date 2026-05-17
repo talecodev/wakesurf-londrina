@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { MessageSquare } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import heroImage from "@/assets/hero-wakeboard.jpg";
 import logo from "@/assets/logo-light.png";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,14 +23,10 @@ const HeroScreen = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative h-screen flex flex-col items-center justify-end overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Wakeboard rider at sunset"
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 gradient-dark-overlay" />
+      <div className="relative h-screen flex flex-col items-center justify-end overflow-hidden bg-background">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
+          <div className="absolute bottom-0 -right-24 h-96 w-96 rounded-full bg-secondary/20 blur-3xl" />
         </div>
 
         <motion.div
