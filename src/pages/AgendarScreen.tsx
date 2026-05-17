@@ -216,7 +216,12 @@ const AgendarScreen = () => {
               Horários disponíveis
             </h3>
             <div className="grid grid-cols-3 gap-3">
-              {TIME_SLOTS.map((time) => {
+              {availableSlots.length === 0 && (
+                <p className="col-span-3 text-sm text-muted-foreground text-center py-4">
+                  Não há mais horários disponíveis hoje. Selecione outro dia.
+                </p>
+              )}
+              {availableSlots.map((time) => {
                 const active = selectedTime === time;
                 return (
                   <button
