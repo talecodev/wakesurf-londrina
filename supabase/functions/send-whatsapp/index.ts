@@ -15,11 +15,27 @@ serve(async (req) => {
     const N8N_WEBHOOK_URL =
       "https://n8n.paessolucoes.com/webhook/wakesurf-londrina";
 
-    const { number, body } = await req.json();
+    const incoming = await req.json();
+    const { number, body, payload } = incoming ?? {};
 
-    if (!number || !body) {
+    // Two modes:
+    //  - structured payload (new): forward `payload` shape to n8n
+    //  - legacy text message: forward { number, body }
+    let outgoing: Record<string, unknown>;
+    if (payload && typeof payload === "object") {
+      outgoing = {
+        ...payload,
+        number: String(number ?? (payload as any).whatsapp ?? "").replace(/\D/g, ""),
+      };
+    } else if (number && body) {
+      outgoing = {
+        number: String(number).replace(/\D/g, ""),
+        body,
+        message: body,
+      };
+    } else {
       return new Response(
-        JSON.stringify({ error: "number and body are required" }),
+        JSON.stringify({ error: "payload or (number + body) required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -27,11 +43,7 @@ serve(async (req) => {
     const response = await fetch(N8N_WEBHOOK_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        number: String(number).replace(/\D/g, ""),
-        body,
-        message: body,
-      }),
+      body: JSON.stringify(outgoing),
     });
 
     const raw = await response.text();
