@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { MessageSquare, Wind, Droplets, Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -14,6 +14,22 @@ const HeroScreen = () => {
   const { forecast, loading: weatherLoading } = useWeatherForecast();
   const today = forecast[0];
   const tomorrow = forecast[1];
+  const [splash, setSplash] = useState(true);
+  const [ripple, setRipple] = useState<{ x: number; y: number; id: number } | null>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setSplash(false), 1600);
+    return () => clearTimeout(t);
+  }, []);
+
+  const handleHeroClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setRipple({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      id: Date.now(),
+    });
+  };
 
   useEffect(() => {
     supabase
@@ -26,12 +42,59 @@ const HeroScreen = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Splash overlay on first load */}
+      <AnimatePresence>
+        {splash && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-background pointer-events-none"
+          >
+            <motion.img
+              src={logo}
+              alt=""
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 1.6, opacity: 0 }}
+              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+              className="h-72 w-auto drop-shadow-[0_0_60px_hsl(var(--primary)/0.6)]"
+            />
+            <motion.div
+              initial={{ scale: 0, opacity: 0.6 }}
+              animate={{ scale: 6, opacity: 0 }}
+              transition={{ duration: 1.4, ease: "easeOut" }}
+              className="absolute h-40 w-40 rounded-full bg-primary/30 blur-3xl"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Hero Section */}
-      <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-background px-6 py-10">
+      <div
+        onClick={handleHeroClick}
+        className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-background px-6 py-10 cursor-pointer"
+      >
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
           <div className="absolute bottom-0 -right-24 h-96 w-96 rounded-full bg-secondary/20 blur-3xl" />
         </div>
+
+        {/* Click ripple effect */}
+        <AnimatePresence>
+          {ripple && (
+            <motion.span
+              key={ripple.id}
+              initial={{ scale: 0, opacity: 0.5 }}
+              animate={{ scale: 8, opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: "easeOut" }}
+              onAnimationComplete={() => setRipple(null)}
+              style={{ left: ripple.x - 40, top: ripple.y - 40 }}
+              className="pointer-events-none absolute h-20 w-20 rounded-full bg-primary/40 blur-2xl"
+            />
+          )}
+        </AnimatePresence>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -39,10 +102,13 @@ const HeroScreen = () => {
           transition={{ duration: 0.8 }}
           className="relative z-10 w-full max-w-sm flex flex-col items-center gap-8"
         >
-          <img
+          <motion.img
             src={logo}
             alt="WAKESURF LONDRINA"
-            className="h-56 w-auto object-contain drop-shadow-2xl"
+            initial={{ scale: 0.9, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ delay: 1.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="h-72 sm:h-80 w-auto object-contain drop-shadow-2xl"
           />
 
           <div className="flex flex-col items-center gap-4 w-full">
