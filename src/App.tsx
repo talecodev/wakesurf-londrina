@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HeroScreen from "./pages/HeroScreen";
 import AgendarScreen from "./pages/AgendarScreen";
 import CadastroScreen from "./pages/CadastroScreen";
-import PagamentoScreen from "./pages/PagamentoScreen";
+import SolicitacaoEnviadaScreen from "./pages/SolicitacaoEnviadaScreen";
 import NotFound from "./pages/NotFound";
 import AdminCalendarScreen from "./pages/AdminCalendarScreen";
 import AdminLoginScreen from "./pages/AdminLoginScreen";
@@ -26,7 +26,7 @@ const App = () => (
           <Route path="/" element={<HeroScreen />} />
           <Route path="/agendar" element={<AgendarScreen />} />
           <Route path="/cadastro" element={<CadastroScreen />} />
-          <Route path="/pagamento" element={<PagamentoScreen />} />
+          <Route path="/solicitacao-enviada" element={<SolicitacaoEnviadaScreen />} />
           <Route path="/admin/calendar" element={<AdminCalendarScreen />} />
           <Route path="/admin/login" element={<AdminLoginScreen />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
