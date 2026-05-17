@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronLeft, Waves, ArrowRight, Loader2 } from "lucide-react";
+import { ChevronLeft, Waves, ArrowRight, Loader2, Check, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -33,6 +33,7 @@ const CadastroScreen = () => {
 
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [reviewing, setReviewing] = useState(false);
   const [form, setForm] = useState<FormData>({
     nome: "",
     telefone: "",
@@ -51,7 +52,12 @@ const CadastroScreen = () => {
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
-      setSaving(true);
+      setReviewing(true);
+    }
+  };
+
+  const handleConfirm = async () => {
+    setSaving(true);
       try {
         const { data, error } = await supabase.rpc("create_booking", {
           _nome: form.nome,
@@ -97,11 +103,11 @@ const CadastroScreen = () => {
       } finally {
         setSaving(false);
       }
-    }
   };
 
   const handleBack = () => {
-    if (step > 0) setStep(step - 1);
+    if (reviewing) setReviewing(false);
+    else if (step > 0) setStep(step - 1);
     else navigate(-1);
   };
 
@@ -130,18 +136,52 @@ const CadastroScreen = () => {
             <div
               key={i}
               className={`h-1 flex-1 rounded-full transition-colors ${
-                i <= step ? "gradient-primary" : "bg-muted"
+                reviewing || i <= step ? "gradient-primary" : "bg-muted"
               }`}
             />
           ))}
         </div>
         <span className="text-xs text-muted-foreground mt-2 block">
-          {step + 1} de {steps.length}
+          {reviewing ? "Revisão" : `${step + 1} de ${steps.length}`}
         </span>
       </div>
 
       {/* Step Content */}
       <div className="flex-1 px-6">
+        {reviewing ? (
+          <motion.div
+            key="review"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
+          >
+            <h2 className="text-2xl font-bold text-foreground font-display">
+              Confira seus dados
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Revise as informações antes de enviar sua solicitação de reserva.
+            </p>
+
+            <div className="glass rounded-2xl p-5 space-y-3 mt-4">
+              {date && (
+                <ReviewRow
+                  label="Data"
+                  value={format(new Date(date), "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                />
+              )}
+              {time && <ReviewRow label="Horário" value={time} />}
+              <ReviewRow label="Nome" value={form.nome} />
+              <ReviewRow label="WhatsApp" value={form.telefone} />
+              <ReviewRow label="Peso" value={form.peso ? `${form.peso} kg` : "-"} />
+              <ReviewRow label="Sexo" value={form.sexo || "-"} />
+              <ReviewRow label="Idade" value={form.idade || "-"} />
+              <ReviewRow
+                label="Contraindicações"
+                value={form.contraindicacoes?.trim() || "Nenhuma"}
+              />
+            </div>
+          </motion.div>
+        ) : (
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -199,10 +239,40 @@ const CadastroScreen = () => {
             )}
           </motion.div>
         </AnimatePresence>
+        )}
       </div>
 
       {/* CTA */}
-      <div className="p-6">
+      <div className="p-6 space-y-3">
+        {reviewing ? (
+          <>
+            <button
+              disabled={saving}
+              onClick={handleConfirm}
+              className="w-full py-4 rounded-2xl gradient-primary text-primary-foreground font-semibold text-lg shadow-glow disabled:opacity-30 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              {saving ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <Check className="h-5 w-5" />
+                  Confirmar reserva
+                </>
+              )}
+            </button>
+            <button
+              disabled={saving}
+              onClick={() => {
+                setReviewing(false);
+                setStep(0);
+              }}
+              className="w-full py-4 rounded-2xl glass text-foreground font-semibold text-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <Pencil className="h-4 w-4" />
+              Alterar dados
+            </button>
+          </>
+        ) : (
         <button
           disabled={!canAdvance || saving}
           onClick={handleNext}
@@ -217,9 +287,23 @@ const CadastroScreen = () => {
             </>
           )}
         </button>
+        )}
       </div>
     </div>
   );
 };
+
+function ReviewRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4">
+      <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium shrink-0">
+        {label}
+      </span>
+      <span className="text-sm text-foreground font-medium text-right capitalize-first">
+        {value}
+      </span>
+    </div>
+  );
+}
 
 export default CadastroScreen;
