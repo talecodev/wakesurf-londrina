@@ -9,6 +9,8 @@ export type DayWeather = {
   date: string; // yyyy-MM-dd
   precipitationMm: number;
   windMaxKmh: number;
+  tempMaxC: number;
+  tempMinC: number;
   condition: "good" | "moderate" | "bad";
 };
 
@@ -28,7 +30,7 @@ export function useWeatherForecast() {
     const fetchWeather = async () => {
       try {
         const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${SPOT_LAT}&longitude=${SPOT_LON}&daily=precipitation_sum,wind_speed_10m_max&timezone=America/Sao_Paulo&forecast_days=16`
+          `https://api.open-meteo.com/v1/forecast?latitude=${SPOT_LAT}&longitude=${SPOT_LON}&daily=precipitation_sum,wind_speed_10m_max,temperature_2m_max,temperature_2m_min&timezone=America/Sao_Paulo&forecast_days=16`
         );
         const data = await res.json();
 
@@ -36,6 +38,8 @@ export function useWeatherForecast() {
           date,
           precipitationMm: data.daily.precipitation_sum[i] ?? 0,
           windMaxKmh: data.daily.wind_speed_10m_max[i] ?? 0,
+          tempMaxC: data.daily.temperature_2m_max?.[i] ?? 0,
+          tempMinC: data.daily.temperature_2m_min?.[i] ?? 0,
           condition: classifyCondition(
             data.daily.precipitation_sum[i] ?? 0,
             data.daily.wind_speed_10m_max[i] ?? 0
