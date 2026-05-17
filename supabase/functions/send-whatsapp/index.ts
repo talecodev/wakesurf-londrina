@@ -12,10 +12,8 @@ serve(async (req) => {
   }
 
   try {
-    const token = Deno.env.get("ATENDITOP_API_TOKEN");
-    if (!token) {
-      throw new Error("ATENDITOP_API_TOKEN is not configured");
-    }
+    const N8N_WEBHOOK_URL =
+      "https://n8n.paessolucoes.com/webhook/wakesurf-londrina";
 
     const { number, body } = await req.json();
 
@@ -26,28 +24,26 @@ serve(async (req) => {
       );
     }
 
-    const response = await fetch(
-      "https://app.atenditop.com.br:443/backend/api/messages/send",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          number: String(number).replace(/\D/g, ""),
-          body,
-          saveOnTicket: true,
-          linkPreview: true,
-          startChatbot: false,
-        }),
-      }
-    );
+    const response = await fetch(N8N_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        number: String(number).replace(/\D/g, ""),
+        body,
+        message: body,
+      }),
+    });
 
-    const data = await response.json();
+    const raw = await response.text();
+    let data: unknown = raw;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      // n8n pode responder texto puro
+    }
 
     if (!response.ok) {
-      console.error("AtendiTop error:", data);
+      console.error("n8n webhook error:", data);
       return new Response(
         JSON.stringify({ error: "Failed to send message", details: data }),
         { status: response.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
