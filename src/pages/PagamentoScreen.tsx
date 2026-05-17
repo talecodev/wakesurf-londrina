@@ -28,17 +28,11 @@ const PagamentoScreen = () => {
   const handleSimulatePay = async () => {
     setProcessing(true);
     try {
-      if (state?.paymentId) {
-        await supabase
-          .from("payments")
-          .update({ status: "paid", paid_at: new Date().toISOString() })
-          .eq("id", state.paymentId);
-      }
-      if (state?.sessionId) {
-        await supabase
-          .from("sessions")
-          .update({ status: "confirmed" })
-          .eq("id", state.sessionId);
+      if (state?.paymentId && state?.sessionId) {
+        await supabase.rpc("confirm_payment", {
+          _payment_id: state.paymentId,
+          _session_id: state.sessionId,
+        });
       }
 
       // Auto-sync to owner's Google Calendar (silent, non-blocking)
