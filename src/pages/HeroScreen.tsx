@@ -1,15 +1,19 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Wind, Thermometer, Droplets, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logo from "@/assets/logo-light.png";
 import { supabase } from "@/integrations/supabase/client";
+import { useWeatherForecast } from "@/hooks/useWeatherForecast";
 
 const HeroScreen = () => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<any[]>([]);
+  const { forecast, loading: weatherLoading } = useWeatherForecast();
+  const today = forecast[0];
+  const tomorrow = forecast[1];
 
   useEffect(() => {
     supabase
@@ -67,15 +71,51 @@ const HeroScreen = () => {
             >
               🏄 Entrar como Rider
             </button>
-
-            <button
-              onClick={() => navigate("/admin/login")}
-              className="w-full py-3 px-8 rounded-2xl glass text-muted-foreground font-medium text-xs active:scale-[0.98] transition-transform"
-            >
-              Fazer login como administrador
-            </button>
           </div>
         </motion.div>
+      </div>
+
+      {/* Weather Section — Today & Tomorrow */}
+      <div className="px-6 pt-8 pb-2 space-y-4">
+        <div className="flex items-center gap-2">
+          <Wind className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-bold text-foreground font-display">Condições — Porecatu</h2>
+          {weatherLoading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground ml-auto" />}
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: "Hoje", data: today },
+            { label: "Amanhã", data: tomorrow },
+          ].map(({ label, data }) => (
+            <div key={label} className="liquid-glass rounded-2xl p-4 space-y-3">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
+              {data ? (
+                <>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-extrabold text-foreground font-display">
+                      {Math.round(data.tempMaxC)}°
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      / {Math.round(data.tempMinC)}°
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Wind className="h-3 w-3 text-primary" />
+                      {data.windMaxKmh.toFixed(0)} km/h
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Droplets className="h-3 w-3 text-primary" />
+                      {data.precipitationMm.toFixed(1)}mm
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="h-12 flex items-center text-xs text-muted-foreground">—</div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Mural de Recados */}
@@ -104,6 +144,16 @@ const HeroScreen = () => {
           </div>
         </div>
       )}
+
+      {/* Admin login — always at the very bottom */}
+      <div className="px-6 pb-10 pt-4">
+        <button
+          onClick={() => navigate("/admin/login")}
+          className="w-full max-w-sm mx-auto block py-3 px-8 rounded-2xl glass text-muted-foreground font-medium text-xs active:scale-[0.98] transition-transform"
+        >
+          Fazer login como administrador
+        </button>
+      </div>
     </div>
   );
 };
