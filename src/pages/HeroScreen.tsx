@@ -109,7 +109,7 @@ const HeroScreen = () => {
             initial={{ scale: 0.9, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ delay: 1.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="h-72 sm:h-80 w-auto object-contain drop-shadow-2xl"
+            className="h-96 sm:h-[28rem] w-auto object-contain drop-shadow-2xl"
           />
 
           <div className="flex flex-col items-center gap-4 w-full">
