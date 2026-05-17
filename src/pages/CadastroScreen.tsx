@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Waves, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+const WAKESURF_WHATSAPP = "5544988586268";
 
 interface FormData {
   nome: string;
@@ -61,17 +65,32 @@ const CadastroScreen = () => {
         });
 
         if (error || !data) throw error;
-        const result = data as { profile_id: string; session_id: string; payment_id: string };
+        const result = data as { profile_id: string; session_id: string };
 
-        navigate("/pagamento", {
-          state: {
-            ...form,
-            date,
-            time,
-            sessionId: result.session_id,
-            paymentId: result.payment_id,
-            profileId: result.profile_id,
-          },
+        const dataFmt = date
+          ? format(new Date(date), "dd/MM/yyyy (EEEE)", { locale: ptBR })
+          : "(sem data)";
+
+        const resumo =
+          `🏄 *Nova solicitação de Session — Wakesurf*\n\n` +
+          `*Data desejada:* ${dataFmt}\n` +
+          `*Horário:* ${time ?? "-"}\n\n` +
+          `*Nome:* ${form.nome}\n` +
+          `*WhatsApp:* ${form.telefone}\n` +
+          `*Peso:* ${form.peso ? form.peso + " kg" : "-"}\n` +
+          `*Sexo:* ${form.sexo || "-"}\n` +
+          `*Idade:* ${form.idade || "-"}\n` +
+          `*Contraindicações:* ${form.contraindicacoes?.trim() || "Nenhuma"}\n\n` +
+          `Entrar em contato para confirmar agendamento.`;
+
+        supabase.functions
+          .invoke("send-whatsapp", {
+            body: { number: WAKESURF_WHATSAPP, body: resumo },
+          })
+          .catch(() => {});
+
+        navigate("/solicitacao-enviada", {
+          state: { nome: form.nome, date, time },
         });
       } catch (err) {
         console.error("Erro ao salvar:", err);
