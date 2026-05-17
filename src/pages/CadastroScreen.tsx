@@ -49,46 +49,29 @@ const CadastroScreen = () => {
     } else {
       setSaving(true);
       try {
-        // 1. Create profile
-        const { data: profile, error: profileErr } = await supabase
-          .from("profiles")
-          .insert({
-            nome: form.nome,
-            telefone: form.telefone,
-            peso: form.peso ? Number(form.peso) : null,
-            sexo: form.sexo || null,
-            idade: form.idade ? Number(form.idade) : null,
-            contraindicacoes: form.contraindicacoes || null,
-          })
-          .select()
-          .single();
+        const { data, error } = await supabase.rpc("create_booking", {
+          _nome: form.nome,
+          _telefone: form.telefone,
+          _peso: form.peso ? Number(form.peso) : null,
+          _sexo: form.sexo || null,
+          _idade: form.idade ? Number(form.idade) : null,
+          _contraindicacoes: form.contraindicacoes || null,
+          _session_date: date,
+          _session_time: time,
+        });
 
-        if (profileErr || !profile) throw profileErr;
-
-        // 2. Create session
-        const { data: session, error: sessionErr } = await supabase
-          .from("sessions")
-          .insert({
-            profile_id: profile.id,
-            session_date: date,
-            session_time: time,
-          })
-          .select()
-          .single();
-
-        if (sessionErr || !session) throw sessionErr;
-
-        // 3. Create pending payment
-        const { data: payment, error: paymentErr } = await supabase
-          .from("payments")
-          .insert({ session_id: session.id })
-          .select()
-          .single();
-
-        if (paymentErr || !payment) throw paymentErr;
+        if (error || !data) throw error;
+        const result = data as { profile_id: string; session_id: string; payment_id: string };
 
         navigate("/pagamento", {
-          state: { ...form, date, time, sessionId: session.id, paymentId: payment.id, profileId: profile.id },
+          state: {
+            ...form,
+            date,
+            time,
+            sessionId: result.session_id,
+            paymentId: result.payment_id,
+            profileId: result.profile_id,
+          },
         });
       } catch (err) {
         console.error("Erro ao salvar:", err);
