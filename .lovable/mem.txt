@@ -1,0 +1,24 @@
+---
+name: Theme and Typography
+description: Full color palette, aesthetic rules, and typography weights
+type: design
+---
+Colors:
+- Background: Dark Blue (#01191c) — substituído no SaaS refactor por neutro #0a0a0b
+- Primary/Highlight: Salmon Orange (#ff753f)
+- Secondary: Teal (#1b5f68)
+
+Aesthetics:
+- Premium minimalist dark theme, mobile-first.
+- "Liquid glass" effect: 12px+ blur on glass cards.
+- Corners: heavily rounded (20pt+).
+
+Typography (manual da marca):
+- Títulos (font-display): **Gardein Extra Bold (800)**. Fallback web: Sora 800.
+- Texto corrido (font-sans, body default): **Neulis Sans Light (300)**. Fallback: Manrope 300.
+- Detalhes/labels: **Neulis Sans Medium (500)**. Fallback: Manrope 500.
+
+Implementação:
+- Gardein e Neulis Sans são comerciais — declaradas primeiro na font-stack para o caso de o usuário carregar os arquivos .woff2 depois. Caem para Sora/Manrope (Google Fonts) por padrão.
+- body usa font-weight 300 (Light) por padrão.
+- h1-h6 e .font-display recebem Gardein/Sora 800 com letter-spacing -0.02em automaticamente via index.css.
