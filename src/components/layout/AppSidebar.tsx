@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import logoDark from "@/assets/logo-dark.png";
+import logoDark from "@/assets/logo-wordmark.png";
 
 type Variant = "admin" | "rider";
 

@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { MessageSquare, Wind, Droplets, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import logo from "@/assets/logo-light.png";
+import logoSplash from "@/assets/logo-splash.png";
+import logoWordmark from "@/assets/logo-wordmark.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useWeatherForecast } from "@/hooks/useWeatherForecast";
 
@@ -52,7 +53,7 @@ const HeroScreen = () => {
             className="fixed inset-0 z-50 flex items-center justify-center bg-background pointer-events-none"
           >
             <motion.img
-              src={logo}
+              src={logoSplash}
               alt=""
               initial={{ scale: 0.6, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -103,7 +104,7 @@ const HeroScreen = () => {
           className="relative z-10 w-full max-w-sm flex flex-col items-center gap-8"
         >
           <motion.img
-            src={logo}
+            src={logoWordmark}
             alt="WAKESURF LONDRINA"
             initial={{ scale: 0.9, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
