@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-
-// Coordenadas do spot de wakeboard — Porecatu, Paraná
-const SPOT_LAT = -22.7558;
-const SPOT_LON = -51.3789;
+import { supabase } from "@/integrations/supabase/client";
 
 export type DayWeather = {
   date: string; // yyyy-MM-dd
@@ -29,10 +26,8 @@ export function useWeatherForecast() {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${SPOT_LAT}&longitude=${SPOT_LON}&daily=precipitation_sum,wind_speed_10m_max,temperature_2m_max,temperature_2m_min&timezone=America/Sao_Paulo&forecast_days=16`
-        );
-        const data = await res.json();
+        const { data, error } = await supabase.functions.invoke("weather-forecast");
+        if (error || !data?.daily) throw error ?? new Error("no data");
 
         const days: DayWeather[] = data.daily.time.map((date: string, i: number) => ({
           date,

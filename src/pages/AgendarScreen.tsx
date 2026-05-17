@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Waves, CloudRain, Wind, Sun, CloudSun, Loader2 } from "lucide-react";
@@ -38,15 +38,30 @@ const WeatherBadge = ({ weather, selected }: { weather?: DayWeather; selected: b
 
 const AgendarScreen = () => {
   const navigate = useNavigate();
-  const [weekStart, setWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const now = new Date();
+  const today = startOfDay(now);
+  // Se não há mais slots disponíveis hoje, default para amanhã
+  const lastSlot = TIME_SLOTS[TIME_SLOTS.length - 1];
+  const [lh, lm] = lastSlot.split(":").map(Number);
+  const todayHasSlots = now.getHours() < lh || (now.getHours() === lh && now.getMinutes() < lm);
+  const defaultDate = todayHasSlots ? today : addDays(today, 1);
+  const [weekStart, setWeekStart] = useState(startOfWeek(defaultDate, { weekStartsOn: 1 }));
+  const [selectedDate, setSelectedDate] = useState<Date | null>(defaultDate);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const { getWeatherForDate, loading: weatherLoading } = useWeatherForecast();
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const today = startOfDay(new Date());
 
   const selectedWeather = selectedDate ? getWeatherForDate(selectedDate) : undefined;
+
+  // Filtra horários passados quando a data selecionada for hoje
+  const availableSlots = useMemo(() => {
+    if (!selectedDate || !isSameDay(selectedDate, today)) return TIME_SLOTS;
+    return TIME_SLOTS.filter((t) => {
+      const [h, m] = t.split(":").map(Number);
+      return h > now.getHours() || (h === now.getHours() && m > now.getMinutes());
+    });
+  }, [selectedDate]);
 
   const handleContinue = () => {
     if (selectedDate && selectedTime) {
@@ -201,7 +216,12 @@ const AgendarScreen = () => {
               Horários disponíveis
             </h3>
             <div className="grid grid-cols-3 gap-3">
-              {TIME_SLOTS.map((time) => {
+              {availableSlots.length === 0 && (
+                <p className="col-span-3 text-sm text-muted-foreground text-center py-4">
+                  Não há mais horários disponíveis hoje. Selecione outro dia.
+                </p>
+              )}
+              {availableSlots.map((time) => {
                 const active = selectedTime === time;
                 return (
                   <button
