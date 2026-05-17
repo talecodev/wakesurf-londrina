@@ -212,7 +212,7 @@ const CadastroScreen = () => {
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             <>
-              {step < steps.length - 1 ? "Continuar" : "Ir para pagamento"}
+              {step < steps.length - 1 ? "Continuar" : "Solicitar reserva"}
               <ArrowRight className="h-5 w-5" />
             </>
           )}
