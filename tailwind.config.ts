@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        display: ['Nunito', 'DM Sans', 'sans-serif'],
+        sans: ['Neulis Sans', 'Manrope', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['Gardein', 'Sora', 'Manrope', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
