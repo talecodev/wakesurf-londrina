@@ -27,11 +27,11 @@ const SolicitacaoEnviadaScreen = () => {
         className="text-center space-y-3 max-w-sm"
       >
         <h1 className="text-3xl font-bold text-foreground font-display">
-          Solicitação enviada!
+          Solicitação recebida!
         </h1>
         <p className="text-muted-foreground">
           {state?.nome ? `Valeu, ${state.nome.split(" ")[0]}! ` : ""}
-          Recebemos sua solicitação e a equipe da Wakesurf vai te chamar no WhatsApp para confirmar o agendamento.
+          Em breve entraremos em contato pelo WhatsApp para dar continuidade na sua intenção de reserva.
         </p>
 
         {state?.date && (
