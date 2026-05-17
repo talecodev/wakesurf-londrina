@@ -23,68 +23,58 @@ const HeroScreen = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative h-screen flex flex-col items-center justify-end overflow-hidden bg-background">
+      <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-background px-6 py-10">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
           <div className="absolute bottom-0 -right-24 h-96 w-96 rounded-full bg-secondary/20 blur-3xl" />
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="absolute top-4 left-0 right-0 flex items-center justify-center z-20"
+          transition={{ duration: 0.8 }}
+          className="relative z-10 w-full max-w-sm flex flex-col items-center gap-8"
         >
           <img
             src={logo}
             alt="WAKESURF LONDRINA"
             className="h-56 w-auto object-contain drop-shadow-2xl"
           />
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="relative z-10 w-full px-6 pb-12 flex flex-col items-center gap-6"
-        >
-          <div className="text-center space-y-3">
-            <h1 className="text-4xl font-extrabold tracking-tight text-foreground leading-tight font-display">
+          <div className="flex flex-col items-center gap-4 w-full">
+            <h1 className="text-4xl font-extrabold tracking-tight text-foreground leading-tight font-display text-center">
               Domine as <br />
               <span className="text-gradient">águas.</span>
             </h1>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              className="liquid-glass rounded-3xl px-5 py-3.5 max-w-xs mx-auto"
-            >
+            <div className="liquid-glass rounded-3xl px-5 py-3.5 w-full max-w-xs">
               <p className="text-foreground/85 text-xs leading-relaxed text-center font-light">
                 Pratique um esporte e conecte-se com a natureza, recarregue as energias e eleve a sua inspiração.
               </p>
-            </motion.div>
+            </div>
           </div>
 
-          <button
-            onClick={() => navigate("/agendar")}
-            className="w-full max-w-sm py-4 px-8 rounded-2xl gradient-primary text-primary-foreground font-semibold text-lg shadow-glow active:scale-[0.98] transition-transform"
-          >
-            Quero agendar minha session
-          </button>
+          <div className="flex flex-col items-center gap-4 w-full">
+            <button
+              onClick={() => navigate("/agendar")}
+              className="w-full py-4 px-8 rounded-2xl gradient-primary text-primary-foreground font-semibold text-lg shadow-glow active:scale-[0.98] transition-transform"
+            >
+              Quero agendar minha session
+            </button>
 
-          <button
-            onClick={() => navigate("/rider/login")}
-            className="w-full max-w-sm py-3 px-8 rounded-2xl glass text-foreground font-medium text-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-          >
-            🏄 Entrar como Rider
-          </button>
+            <button
+              onClick={() => navigate("/rider/login")}
+              className="w-full py-3 px-8 rounded-2xl glass text-foreground font-medium text-sm active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+            >
+              🏄 Entrar como Rider
+            </button>
 
-          <button
-            onClick={() => navigate("/admin/login")}
-            className="w-full max-w-sm py-3 px-8 rounded-2xl glass text-muted-foreground font-medium text-xs active:scale-[0.98] transition-transform"
-          >
-            Fazer login como administrador
-          </button>
+            <button
+              onClick={() => navigate("/admin/login")}
+              className="w-full py-3 px-8 rounded-2xl glass text-muted-foreground font-medium text-xs active:scale-[0.98] transition-transform"
+            >
+              Fazer login como administrador
+            </button>
+          </div>
         </motion.div>
       </div>
 
