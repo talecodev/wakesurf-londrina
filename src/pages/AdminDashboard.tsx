@@ -3,14 +3,16 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   DollarSign, Calendar, CloudRain, Wind, Sun, CloudSun,
-  Clock, MessageSquare, LogOut, Loader2, Plus, Trash2, Send,
-  ChevronLeft, Image as ImageIcon, Upload
+  Clock, MessageSquare, Loader2, Plus, Trash2, Send,
+  Image as ImageIcon, Upload
 } from "lucide-react";
 import { format, addDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { useWeatherForecast, type DayWeather } from "@/hooks/useWeatherForecast";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { SectionCard, StatCard } from "@/components/layout/SectionCard";
 
 const WeatherIcon = ({ condition }: { condition: DayWeather["condition"] }) => {
   switch (condition) {
@@ -182,239 +184,262 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-12 pb-6">
-        <button onClick={() => navigate("/")} className="text-muted-foreground">
-          <ChevronLeft className="h-6 w-6" />
-        </button>
-        <h1 className="text-lg font-bold text-foreground">Dashboard Admin</h1>
-        <button onClick={handleLogout} className="text-muted-foreground">
-          <LogOut className="h-5 w-5" />
-        </button>
-      </div>
-
-      <div className="px-6 space-y-6">
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="glass rounded-2xl p-4 space-y-1">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <DollarSign className="h-4 w-4 text-primary" />
-              <span className="text-xs uppercase tracking-wider">Faturamento</span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">
-              R$ {revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-          <div className="glass rounded-2xl p-4 space-y-1">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Clock className="h-4 w-4 text-primary" />
-              <span className="text-xs uppercase tracking-wider">Horas na Água</span>
-            </div>
-            <p className="text-2xl font-bold text-foreground">{totalHours}h</p>
-          </div>
+    <DashboardLayout
+      variant="admin"
+      title="Visão geral"
+      subtitle="Painel administrativo · Wakesurf Londrina"
+      onLogout={handleLogout}
+    >
+      <div className="space-y-6">
+        {/* KPI grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label="Faturamento"
+            value={`R$ ${revenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+            icon={DollarSign}
+            hint="Pagamentos confirmados"
+            accent
+          />
+          <StatCard
+            label="Horas na água"
+            value={`${totalHours}h`}
+            icon={Clock}
+            hint="Sessões confirmadas"
+          />
+          <StatCard
+            label="Próximas (5d)"
+            value={sessions.length}
+            icon={Calendar}
+            hint="Sessões agendadas"
+          />
+          <StatCard
+            label="Recados ativos"
+            value={messages.length}
+            icon={MessageSquare}
+            hint="Publicados no mural"
+          />
         </div>
 
-        {/* Clima - Próximos 5 dias */}
-        <div className="glass rounded-2xl p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <CloudRain className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-              Clima — Porecatu, PR
-            </h2>
-          </div>
-          {weatherLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mx-auto" />
-          ) : (
-            <div className="flex gap-2">
-              {weatherNext5.map(({ date, weather }) => (
-                <div
-                  key={date.toISOString()}
-                  className="flex-1 bg-secondary/50 rounded-xl p-3 flex flex-col items-center gap-1"
-                >
-                  <span className="text-xs text-muted-foreground capitalize">
-                    {format(date, "EEE", { locale: ptBR })}
-                  </span>
-                  <span className="text-sm font-bold text-foreground">{format(date, "dd")}</span>
-                  {weather ? (
-                    <>
-                      <WeatherIcon condition={weather.condition} />
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                        <Wind className="h-2.5 w-2.5" />{weather.windMaxKmh.toFixed(0)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-[10px] text-muted-foreground">—</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Calendário - Próximas sessões */}
-        <div className="glass rounded-2xl p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-              Próximas Sessões (5 dias)
-            </h2>
-          </div>
-          {sessions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">Nenhuma sessão agendada</p>
-          ) : (
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {sessions.map((s) => (
-                <div key={s.id} className="flex items-center justify-between bg-secondary/50 rounded-xl p-3">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {s.profiles?.nome || "Cliente"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(s.session_date + "T12:00:00"), "dd/MM", { locale: ptBR })} às {s.session_time}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      s.status === "confirmed"
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : "bg-amber-500/20 text-amber-400"
-                    }`}>
-                      {s.status === "confirmed" ? "Confirmado" : "Pendente"}
-                    </span>
-                    {s.profiles?.telefone && (
-                      <button
-                        onClick={() => handleSendWhatsApp(s)}
-                        disabled={sendingWhatsApp === s.id}
-                        className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
-                        title="Enviar alerta via WhatsApp"
-                      >
-                        {sendingWhatsApp === s.id ? (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <Send className="h-3.5 w-3.5" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Mural de Recados */}
-        <div className="glass rounded-2xl p-4 space-y-4">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-              Mural de Recados
-            </h2>
-          </div>
-
-          {/* Novo recado */}
-          <div className="space-y-2">
-            <input
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Título do recado"
-              className="w-full px-3 py-2 rounded-xl bg-secondary/50 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-            <textarea
-              value={newContent}
-              onChange={(e) => setNewContent(e.target.value)}
-              placeholder="Conteúdo..."
-              rows={2}
-              className="w-full px-3 py-2 rounded-xl bg-secondary/50 text-foreground placeholder:text-muted-foreground text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-            <button
-              onClick={handlePostMessage}
-              disabled={!newTitle.trim() || !newContent.trim()}
-              className="w-full py-2.5 rounded-xl gradient-primary text-primary-foreground font-medium text-sm disabled:opacity-40 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+        {/* Two-column grid on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Clima */}
+            <SectionCard
+              title="Clima — Porecatu, PR"
+              icon={CloudRain}
+              description="Previsão para os próximos 5 dias"
             >
-              <Plus className="h-4 w-4" /> Publicar Recado
-            </button>
+              {weatherLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mx-auto" />
+              ) : (
+                <div className="grid grid-cols-5 gap-2">
+                  {weatherNext5.map(({ date, weather }) => (
+                    <div
+                      key={date.toISOString()}
+                      className="rounded-lg border border-border bg-muted/40 p-3 flex flex-col items-center gap-1.5"
+                    >
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                        {format(date, "EEE", { locale: ptBR })}
+                      </span>
+                      <span className="text-base font-bold text-foreground font-display">
+                        {format(date, "dd")}
+                      </span>
+                      {weather ? (
+                        <>
+                          <WeatherIcon condition={weather.condition} />
+                          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                            <Wind className="h-2.5 w-2.5" />
+                            {weather.windMaxKmh.toFixed(0)}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-[10px] text-muted-foreground">—</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </SectionCard>
+
+            {/* Próximas sessões */}
+            <SectionCard
+              title="Próximas sessões"
+              icon={Calendar}
+              description="Agendamentos confirmados e pendentes"
+            >
+              {sessions.length === 0 ? (
+                <div className="text-center py-10">
+                  <Calendar className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Nenhuma sessão agendada</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border/60 -mx-5">
+                  {sessions.map((s) => (
+                    <div
+                      key={s.id}
+                      className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {s.profiles?.nome || "Cliente"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(s.session_date + "T12:00:00"), "dd 'de' MMM", { locale: ptBR })} · {s.session_time}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${
+                            s.status === "confirmed"
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                          }`}
+                        >
+                          {s.status === "confirmed" ? "Confirmado" : "Pendente"}
+                        </span>
+                        {s.profiles?.telefone && (
+                          <button
+                            onClick={() => handleSendWhatsApp(s)}
+                            disabled={sendingWhatsApp === s.id}
+                            className="p-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+                            title="Enviar alerta via WhatsApp"
+                          >
+                            {sendingWhatsApp === s.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Send className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </SectionCard>
+
+            {/* Galeria */}
+            <SectionCard
+              title="Galeria de fotos"
+              icon={ImageIcon}
+              description="Imagens visíveis para os riders"
+            >
+              <div className="space-y-3 mb-4">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    value={photoTitle}
+                    onChange={(e) => setPhotoTitle(e.target.value)}
+                    placeholder="Título da foto (opcional)"
+                    className="flex-1 px-3 py-2 rounded-md bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground text-sm focus-ring"
+                  />
+                  <label className="px-4 py-2 rounded-md bg-primary text-primary-foreground font-medium text-sm flex items-center justify-center gap-2 cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all shrink-0">
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {uploading ? "Enviando..." : "Enviar foto"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadPhoto}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {galleryPhotos.length === 0 ? (
+                <div className="text-center py-10">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Nenhuma foto enviada</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {galleryPhotos.map((p) => (
+                    <div
+                      key={p.id}
+                      className="relative rounded-lg overflow-hidden border border-border bg-muted/30 aspect-square group"
+                    >
+                      <img src={p.image_url} alt={p.title || "Foto"} className="h-full w-full object-cover" />
+                      <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleDeletePhoto(p.id, p.image_url)}
+                          className="p-1.5 rounded-md bg-destructive/80 text-destructive-foreground backdrop-blur"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                      {p.title && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                          <p className="text-[11px] text-white truncate">{p.title}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </SectionCard>
           </div>
 
-          {/* Lista de recados */}
-          <div className="space-y-2 max-h-60 overflow-y-auto">
-            {messages.map((m) => (
-              <motion.div
-                key={m.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-secondary/50 rounded-xl p-3 flex justify-between items-start gap-2"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{m.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{m.content}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    {format(new Date(m.created_at), "dd/MM HH:mm", { locale: ptBR })}
-                  </p>
-                </div>
+          {/* Side column: Mural */}
+          <div className="space-y-6">
+            <SectionCard title="Mural de recados" icon={MessageSquare}>
+              <div className="space-y-2 mb-4">
+                <input
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="Título do recado"
+                  className="w-full px-3 py-2 rounded-md bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground text-sm focus-ring"
+                />
+                <textarea
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  placeholder="Conteúdo..."
+                  rows={3}
+                  className="w-full px-3 py-2 rounded-md bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground text-sm resize-none focus-ring"
+                />
                 <button
-                  onClick={() => handleDeleteMessage(m.id)}
-                  className="text-destructive/60 hover:text-destructive shrink-0"
+                  onClick={handlePostMessage}
+                  disabled={!newTitle.trim() || !newContent.trim()}
+                  className="w-full py-2 rounded-md bg-primary text-primary-foreground font-medium text-sm disabled:opacity-40 flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Plus className="h-4 w-4" /> Publicar
                 </button>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+              </div>
 
-        {/* Galeria de Fotos */}
-        <div className="glass rounded-2xl p-4 space-y-4">
-          <div className="flex items-center gap-2">
-            <ImageIcon className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">
-              Galeria de Fotos
-            </h2>
-          </div>
-
-          <div className="space-y-2">
-            <input
-              value={photoTitle}
-              onChange={(e) => setPhotoTitle(e.target.value)}
-              placeholder="Título da foto (opcional)"
-              className="w-full px-3 py-2 rounded-xl bg-secondary/50 text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-            <label className="w-full py-2.5 rounded-xl gradient-primary text-primary-foreground font-medium text-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] transition-all">
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {uploading ? "Enviando..." : "Enviar Foto"}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleUploadPhoto}
-                className="hidden"
-                disabled={uploading}
-              />
-            </label>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {galleryPhotos.map((p) => (
-              <div key={p.id} className="relative rounded-xl overflow-hidden bg-secondary/50 aspect-square group">
-                <img src={p.image_url} alt={p.title || "Foto"} className="h-full w-full object-cover" />
-                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => handleDeletePhoto(p.id, p.image_url)}
-                    className="p-1.5 rounded-lg bg-destructive/80 text-white"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-                {p.title && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                    <p className="text-xs text-white truncate">{p.title}</p>
-                  </div>
+              <div className="space-y-2 max-h-[28rem] overflow-y-auto pr-1">
+                {messages.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">
+                    Nenhum recado publicado
+                  </p>
+                ) : (
+                  messages.map((m) => (
+                    <motion.div
+                      key={m.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="rounded-md border border-border bg-muted/30 p-3 flex justify-between items-start gap-2"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">{m.title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{m.content}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1.5">
+                          {format(new Date(m.created_at), "dd/MM 'às' HH:mm", { locale: ptBR })}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteMessage(m.id)}
+                        className="text-muted-foreground hover:text-destructive shrink-0 transition-colors"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </motion.div>
+                  ))
                 )}
               </div>
-            ))}
+            </SectionCard>
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
