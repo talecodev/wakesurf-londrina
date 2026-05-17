@@ -268,6 +268,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      confirm_payment: {
+        Args: { _payment_id: string; _session_id: string }
+        Returns: undefined
+      }
+      create_booking: {
+        Args: {
+          _contraindicacoes: string
+          _idade: number
+          _nome: string
+          _peso: number
+          _session_date: string
+          _session_time: string
+          _sexo: string
+          _telefone: string
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
