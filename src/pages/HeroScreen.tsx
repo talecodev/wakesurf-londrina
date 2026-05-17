@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { MessageSquare, Wind, Thermometer, Droplets, Loader2 } from "lucide-react";
+import { MessageSquare, Wind, Droplets, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logo from "@/assets/logo-light.png";
