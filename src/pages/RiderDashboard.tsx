@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  ChevronLeft, LogOut, Loader2, Trophy, Star, Download,
+  Loader2, Trophy, Star, Download,
   Zap, Award, Crown, Shield, Flame, Image as ImageIcon
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { SectionCard, StatCard } from "@/components/layout/SectionCard";
 
 type RiderProfile = {
   id: string;
@@ -142,160 +144,202 @@ const RiderDashboard = () => {
     : 100;
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 pt-12 pb-6">
-        <button onClick={() => navigate("/")} className="text-muted-foreground">
-          <ChevronLeft className="h-6 w-6" />
-        </button>
-        <h1 className="text-lg font-bold text-foreground">Meu Progresso</h1>
-        <button onClick={handleLogout} className="text-muted-foreground">
-          <LogOut className="h-5 w-5" />
-        </button>
-      </div>
-
-      <div className="px-6 space-y-6">
-        {/* Profile + Level Card */}
+    <DashboardLayout
+      variant="rider"
+      title={profile.nickname}
+      subtitle={`Nível ${currentLevel.level} · ${currentLevel.name}`}
+      onLogout={handleLogout}
+    >
+      <div className="space-y-6">
+        {/* Hero profile card */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-6 flex flex-col items-center gap-4"
+          className="surface-elevated relative overflow-hidden p-6 md:p-8"
         >
-          <div className={`h-20 w-20 rounded-full bg-secondary flex items-center justify-center ${currentLevel.color}`}>
-            <LevelIcon className="h-10 w-10" />
-          </div>
-          <div className="text-center space-y-1">
-            <p className="text-xl font-bold text-foreground">{profile.nickname}</p>
-            <p className={`text-sm font-semibold ${currentLevel.color}`}>
-              Nível {currentLevel.level} — {currentLevel.name}
-            </p>
-            <p className="text-xs text-muted-foreground">{sessionCount} sessões realizadas</p>
-          </div>
-
-          {/* Progress bar */}
-          <div className="w-full space-y-1">
-            <div className="relative h-3 w-full overflow-hidden rounded-full bg-secondary">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(progress, 100)}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="h-full rounded-full gradient-primary"
-              />
+          <div className="absolute -top-20 -right-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+          <div className="relative flex flex-col md:flex-row md:items-center gap-6">
+            <div className={`h-20 w-20 md:h-24 md:w-24 rounded-2xl bg-muted border border-border flex items-center justify-center ${currentLevel.color}`}>
+              <LevelIcon className="h-10 w-10 md:h-12 md:w-12" />
             </div>
-            {nextLevel ? (
-              <p className="text-[10px] text-muted-foreground text-center">
-                Faltam {nextLevel.minSessions - sessionCount} sessões para {nextLevel.name}
-              </p>
-            ) : (
-              <p className="text-[10px] text-primary text-center font-semibold">
-                🏆 Nível máximo alcançado!
-              </p>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Levels overview */}
-        <div className="glass rounded-2xl p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <Star className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Níveis</h2>
-          </div>
-          <div className="space-y-2">
-            {LEVELS.map((l) => {
-              const Icon = l.icon;
-              const isActive = currentLevel.level >= l.level;
-              return (
-                <div
-                  key={l.level}
-                  className={`flex items-center gap-3 p-2 rounded-xl ${
-                    isActive ? "bg-secondary/50" : "opacity-40"
-                  }`}
-                >
-                  <Icon className={`h-5 w-5 ${l.color}`} />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">
-                      Nível {l.level} — {l.name}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {l.minSessions === 0 ? "0-5" : l.level === 5 ? "51+" : `${l.minSessions}-${LEVELS[l.level]?.minSessions - 1}`} sessões
-                    </p>
-                  </div>
-                  {isActive && currentLevel.level === l.level && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/20 text-primary font-semibold">
-                      Atual
+            <div className="flex-1 min-w-0 space-y-3">
+              <div>
+                <p className="text-2xl md:text-3xl font-bold text-foreground font-display tracking-tight">
+                  {profile.nickname}
+                </p>
+                <p className={`text-sm font-medium ${currentLevel.color}`}>
+                  Nível {currentLevel.level} — {currentLevel.name}
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs text-muted-foreground">
+                    {sessionCount} sessões realizadas
+                  </span>
+                  {nextLevel && (
+                    <span className="text-[11px] text-muted-foreground">
+                      Próximo: {nextLevel.name}
                     </span>
                   )}
                 </div>
-              );
-            })}
+                <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted border border-border">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(progress, 100)}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="h-full rounded-full gradient-primary"
+                  />
+                </div>
+                {nextLevel ? (
+                  <p className="text-[11px] text-muted-foreground">
+                    Faltam <span className="text-foreground font-medium">{nextLevel.minSessions - sessionCount}</span> sessões para {nextLevel.name}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-primary font-semibold">
+                    🏆 Nível máximo alcançado
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
+        </motion.div>
+
+        {/* Quick stats */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <StatCard label="Sessões" value={sessionCount} icon={Trophy} accent />
+          <StatCard label="Nível atual" value={currentLevel.level} icon={Star} />
+          <StatCard
+            label="Posição"
+            value={
+              ranking.findIndex((r) => r.nickname === profile.nickname) + 1 || "—"
+            }
+            icon={Award}
+            hint={`de ${ranking.length} riders`}
+          />
         </div>
 
-        {/* Ranking */}
-        <div className="glass rounded-2xl p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Ranking</h2>
-          </div>
-          {ranking.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">Nenhum rider ainda</p>
-          ) : (
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {ranking.map((r, i) => {
-                const rLevel = getLevel(r.sessions);
-                const RIcon = rLevel.icon;
-                const isMe = r.nickname === profile.nickname;
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Níveis */}
+          <SectionCard title="Progressão de níveis" icon={Star}>
+            <div className="space-y-1.5">
+              {LEVELS.map((l) => {
+                const Icon = l.icon;
+                const isActive = currentLevel.level >= l.level;
+                const isCurrent = currentLevel.level === l.level;
                 return (
                   <div
-                    key={r.nickname}
-                    className={`flex items-center gap-3 p-2 rounded-xl ${
-                      isMe ? "bg-primary/10 ring-1 ring-primary/30" : "bg-secondary/30"
+                    key={l.level}
+                    className={`flex items-center gap-3 p-2.5 rounded-md border transition-colors ${
+                      isCurrent
+                        ? "bg-primary/5 border-primary/30"
+                        : isActive
+                        ? "bg-muted/40 border-border"
+                        : "border-transparent opacity-40"
                     }`}
                   >
-                    <span className={`text-sm font-bold w-6 text-center ${
-                      i === 0 ? "text-amber-400" : i === 1 ? "text-slate-300" : i === 2 ? "text-amber-600" : "text-muted-foreground"
-                    }`}>
-                      {i + 1}º
-                    </span>
-                    <RIcon className={`h-4 w-4 ${rLevel.color}`} />
+                    <div className={`h-8 w-8 rounded-md bg-muted flex items-center justify-center ${l.color}`}>
+                      <Icon className="h-4 w-4" />
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {r.nickname} {isMe && "⭐"}
+                      <p className="text-sm font-medium text-foreground">
+                        Nível {l.level} — {l.name}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {l.minSessions === 0
+                          ? "0-5"
+                          : l.level === 5
+                          ? "51+"
+                          : `${l.minSessions}-${LEVELS[l.level]?.minSessions - 1}`}{" "}
+                        sessões
                       </p>
                     </div>
-                    <span className="text-xs text-muted-foreground">{r.sessions} sess.</span>
+                    {isCurrent && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/15 text-primary font-semibold border border-primary/20">
+                        Atual
+                      </span>
+                    )}
                   </div>
                 );
               })}
             </div>
-          )}
+          </SectionCard>
+
+          {/* Ranking */}
+          <SectionCard title="Ranking da comunidade" icon={Trophy}>
+            {ranking.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                Nenhum rider ainda
+              </p>
+            ) : (
+              <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
+                {ranking.map((r, i) => {
+                  const rLevel = getLevel(r.sessions);
+                  const RIcon = rLevel.icon;
+                  const isMe = r.nickname === profile.nickname;
+                  return (
+                    <div
+                      key={r.nickname}
+                      className={`flex items-center gap-3 p-2.5 rounded-md border transition-colors ${
+                        isMe
+                          ? "bg-primary/5 border-primary/30"
+                          : "bg-muted/20 border-transparent hover:bg-muted/40"
+                      }`}
+                    >
+                      <span
+                        className={`text-sm font-bold w-7 text-center font-display ${
+                          i === 0
+                            ? "text-amber-400"
+                            : i === 1
+                            ? "text-slate-300"
+                            : i === 2
+                            ? "text-amber-600"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {i + 1}
+                      </span>
+                      <RIcon className={`h-4 w-4 ${rLevel.color}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">
+                          {r.nickname}
+                          {isMe && <span className="ml-1.5 text-primary">·  você</span>}
+                        </p>
+                      </div>
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {r.sessions}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </SectionCard>
         </div>
 
-        {/* Gallery */}
-        <div className="glass rounded-2xl p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <ImageIcon className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Galeria de Fotos</h2>
-          </div>
+        {/* Galeria */}
+        <SectionCard title="Galeria de fotos" icon={ImageIcon} description="Imagens das sessões de treino">
           {photos.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">Nenhuma foto disponível ainda</p>
+            <div className="text-center py-12">
+              <ImageIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Nenhuma foto disponível ainda</p>
+            </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {photos.map((p) => (
                 <motion.div
                   key={p.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.96 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
-                  className="relative group rounded-xl overflow-hidden bg-secondary/50 aspect-square"
+                  className="relative group rounded-lg overflow-hidden border border-border bg-muted/30 aspect-square"
                 >
                   <img
                     src={p.image_url}
                     alt={p.title || "Foto de treino"}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
                     {p.title && (
                       <p className="text-xs text-white font-medium truncate">{p.title}</p>
                     )}
@@ -313,9 +357,9 @@ const RiderDashboard = () => {
               ))}
             </div>
           )}
-        </div>
+        </SectionCard>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
