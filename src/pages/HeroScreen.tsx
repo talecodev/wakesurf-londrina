@@ -85,23 +85,6 @@ const HeroScreen = () => {
           >
             Fazer login como administrador
           </button>
-
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <div className="text-center">
-              <span className="block text-xl font-bold text-foreground">500+</span>
-              Sessions
-            </div>
-            <div className="h-8 w-px bg-border" />
-            <div className="text-center">
-              <span className="block text-xl font-bold text-foreground">1h</span>
-              de Londrina
-            </div>
-            <div className="h-8 w-px bg-border" />
-            <div className="text-center">
-              <span className="block text-xl font-bold text-foreground">10+</span>
-              Anos
-            </div>
-          </div>
         </motion.div>
       </div>
 
